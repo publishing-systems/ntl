@@ -88,7 +88,7 @@ int main(int nArgc, char** pArgv)
             {
                 char cCurrent = pBuffer[i];
 
-                if (cCurrent == '`')
+                if (cCurrent == '#')
                 {
                     if (strBuffer.empty() == false)
                     {
@@ -114,8 +114,6 @@ int main(int nArgc, char** pArgv)
                     strBuffer += cCurrent;
                 }
                 else if (cCurrent == ' ' ||
-                         cCurrent == '/' ||
-                         cCurrent == '\\' ||
                          cCurrent == ':')
                 {
                     if (cCurrent != cLast &&
@@ -202,9 +200,7 @@ int main(int nArgc, char** pArgv)
 bool IsOtherPunct(const char& cChar, const std::locale& aLocale)
 {
     return std::ispunct(cChar, aLocale) == true &&
-           cChar != '`' &&
-           cChar != '/' &&
-           cChar != '\\' &&
+           cChar != '#' &&
            cChar != ':';
 }
 

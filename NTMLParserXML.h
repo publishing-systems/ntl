@@ -42,9 +42,6 @@ private:
     int ParseInstruction(std::ostream& aOutput);
     int ParseTitle(std::ostream& aOutput);
     int ParseList(std::ostream& aOutput);
-    int ParseSubTitle(std::ostream& aOutput);
-    int ParseSubSubTitle(std::ostream& aOutput);
-    int ParseSubSubSubTitle(std::ostream& aOutput);
     int ParseHighlighted(std::ostream& aOutput);
 
 private:

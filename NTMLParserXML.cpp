@@ -44,7 +44,7 @@ int NTMLParserXML::Parse(std::ostream& aOutput)
 
     aOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     aOutput << "<!-- This file was created by ntml_to_xml_1, which is free software licensed under the GNU Affero General Public License 3 or any later version (see https://github.com/publishing-systems/ntml/ and http://www.publishing-systems.org). -->\n";
-    aOutput << "<ntml version=\"0.1\">\n";
+    aOutput << "<ntml version=\"0.2\">\n";
 
     std::string strParagraph;
 
@@ -52,7 +52,7 @@ int NTMLParserXML::Parse(std::ostream& aOutput)
     {
         const std::string strToken = *m_aIter;
 
-        if (strToken == "`")
+        if (strToken == "#")
         {
             if (strParagraph.empty() == false)
             {
@@ -84,33 +84,12 @@ int NTMLParserXML::Parse(std::ostream& aOutput)
 
             strParagraph += aHighlighted.str();
         }
-        else if (strToken == "\\\\")
-        {
-            std::list<std::string>::iterator aIterLookahead = m_aIter;
-            ++aIterLookahead;
-
-            if (aIterLookahead != m_aTokens.end())
-            {
-                if (*aIterLookahead == "\n" ||
-                    *aIterLookahead == "\r")
-                {
-                    m_aIter = aIterLookahead;
-                    continue;
-                }
-            }
-            else
-            {
-                // TODO: throw!
-                break;
-            }
-        }
         else
         {
             strParagraph += *m_aIter;
         }
 
         ++m_aIter;
-        std::cout << *m_aIter << std::endl;
     }
 
     if (strParagraph.empty() == false)
@@ -119,7 +98,7 @@ int NTMLParserXML::Parse(std::ostream& aOutput)
     }
 
     aOutput << "</ntml>" << std::endl;
-    
+
     return 0;
 }
 
@@ -127,44 +106,19 @@ int NTMLParserXML::ParseInstruction(std::ostream& aOutput)
 {
     std::string strInstruction = GetNextToken();
 
-    if (strInstruction == "ttl")
+    if (strInstruction == "t")
     {
         if (ParseTitle(aOutput) != 0)
         {
             return -1;
         }
     }
-    else if (strInstruction == "lst")
+    else if (strInstruction == "b")
     {
         if (ParseList(aOutput) != 0)
         {
             return -1;
         }
-    }
-    else if (strInstruction == "sttl")
-    {
-        if (ParseSubTitle(aOutput) != 0)
-        {
-            return -1;
-        }
-    }
-    else if (strInstruction == "ssttl")
-    {
-        if (ParseSubSubTitle(aOutput) != 0)
-        {
-            return -1;
-        }
-    }
-    else if (strInstruction == "sssttl")
-    {
-        if (ParseSubSubSubTitle(aOutput) != 0)
-        {
-            return -1;
-        }
-    }
-    else if (strInstruction == "ln")
-    {
-        
     }
     else
     {
@@ -199,26 +153,17 @@ int NTMLParserXML::ParseTitle(std::ostream& aOutput)
 
 int NTMLParserXML::ParseList(std::ostream& aOutput)
 {
-    match(" ");
+    std::string strToken = GetNextToken();
 
-    aOutput << "<list>";
-
-    std::string strListName;
-
-    while (true)
+    if (strToken != "\n" &&
+        strToken != "\r" &&
+        strToken != "\r\n")
     {
-        const std::string& strToken = GetNextToken();
-
-        if (strToken.find('\n') == 0 ||
-            strToken.find('\r') == 0)
-        {
-            break;
-        }
-
-        strListName += strToken;
+        std::cout << "ntml_to_xml_1: Parser: List instruction isn't followed by a newline character." << std::endl;
+        return -1;
     }
 
-    aOutput << "<list-name>" << strListName << "</list-name>";
+    aOutput << "<list>";
 
     match(" ");
 
@@ -228,134 +173,31 @@ int NTMLParserXML::ParseList(std::ostream& aOutput)
     {
         const std::string& strToken = GetNextToken();
 
-        if (strToken.find(' ') == 0)
-        {
-            std::list<std::string>::iterator aIterLookahead = m_aIter;
-            ++aIterLookahead;
-
-            if (aIterLookahead != m_aTokens.end())
-            {
-                if (aIterLookahead->find("//") == 0)
-                {
-                    m_aIter = aIterLookahead;
-                    break;
-                }
-            }
-            else
-            {
-                // TODO: throw!
-                break;
-            }
-        }
-        else if (strToken.find('/') == 0)
-        {
-            std::list<std::string>::iterator aIterLookahead = m_aIter;
-            ++aIterLookahead;
-
-            if (aIterLookahead != m_aTokens.end())
-            {
-                if (aIterLookahead->find('/') == 0)
-                {
-                    m_aIter = aIterLookahead;
-                    break;
-                }
-            }
-            else
-            {
-                // TODO: throw!
-                break;
-            }
-        }
-        else if (strToken.find('\n') == 0 ||
-                 strToken.find('\r') == 0)
+        if (strToken == "\n" ||
+            strToken == "\r" ||
+            strToken == "\r\n")
         {
             aOutput << "<item>" << strItemText << "</item>";
             strItemText.clear();
 
-            match(" ");
+            std::list<std::string>::iterator aIterLookahead = m_aIter;
+            ++aIterLookahead;
 
-            continue;
+            if (*aIterLookahead == " ")
+            {
+                m_aIter = aIterLookahead;
+                continue;
+            }
+            else
+            {
+                break;
+            }
         }
 
         strItemText += strToken;
     }
 
-    if (strItemText.empty() == false)
-    {
-        aOutput << "<item>" << strItemText << "</item>";
-        strItemText.clear();
-    }
-
     aOutput << "</list>";
-    return 0;
-}
-
-int NTMLParserXML::ParseSubTitle(std::ostream& aOutput)
-{
-    match(" ");
-
-    std::string strTitle;
-
-    while (true)
-    {
-        const std::string& strToken = GetNextToken();
-
-        if (strToken.find('\n') == 0 ||
-            strToken.find('\r') == 0)
-        {
-            break;
-        }
-
-        strTitle += strToken;
-    }
-
-    aOutput << "<sub-title>" << strTitle << "</sub-title>";
-    return 0;
-}
-
-int NTMLParserXML::ParseSubSubTitle(std::ostream& aOutput)
-{
-    match(" ");
-
-    std::string strTitle;
-
-    while (true)
-    {
-        const std::string& strToken = GetNextToken();
-
-        if (strToken.find('\n') == 0 ||
-            strToken.find('\r') == 0)
-        {
-            break;
-        }
-
-        strTitle += strToken;
-    }
-
-    aOutput << "<sub-sub-title>" << strTitle << "</sub-sub-title>";
-    return 0;
-}
-
-int NTMLParserXML::ParseSubSubSubTitle(std::ostream& aOutput)
-{
-    match(" ");
-
-    std::string strTitle;
-
-    while (true)
-    {
-        const std::string& strToken = GetNextToken();
-
-        if (strToken.find('\n') == 0 ||
-            strToken.find('\r') == 0)
-        {
-            break;
-        }
-        
-        strTitle += strToken;
-    }
-    
-    aOutput << "<sub-sub-sub-title>" << strTitle << "</sub-sub-sub-title>";
     return 0;
 }
 
