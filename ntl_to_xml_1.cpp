@@ -1,19 +1,19 @@
 /* Copyright (C) 2017 Stephan Kreutzer
  *
- * This file is part of ntml_to_xml_1, an extension for the
+ * This file is part of ntl_to_xml_1, an extension for the
  * digital_publishing_workflow_tools package.
  *
- * ntml_to_xml_1 is free software: you can redistribute it and/or modify
+ * ntl_to_xml_1 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License version 3 or any later version,
  * as published by the Free Software Foundation.
  *
- * ntml_to_xml_1 is distributed in the hope that it will be useful,
+ * ntl_to_xml_1 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License 3 for more details.
  *
  * You should have received a copy of the GNU Affero General Public License 3
- * along with ntml_to_xml_1. If not, see <http://www.gnu.org/licenses/>.
+ * along with ntl_to_xml_1. If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -24,7 +24,7 @@
 #include <string>
 #include <locale>
 
-#include "NTMLParserXML.h"
+#include "NTLParserXML.h"
 
 
 
@@ -35,12 +35,12 @@ bool IsOtherSpace(const char& cChar, const std::locale& aLocale);
 
 int main(int nArgc, char** pArgv)
 {
-    std::cout << "ntml_to_xml_1 Copyright (C) 2017 Stephan Kreutzer\n"
+    std::cout << "ntl_to_xml_1 Copyright (C) 2017 Stephan Kreutzer\n"
               << "This program comes with ABSOLUTELY NO WARRANTY.\n"
               << "This is free software, and you are welcome to redistribute it\n"
               << "under certain conditions. See the GNU Affero General Public License 3\n"
               << "or any later version for details. Also, see the source code repository\n"
-              << "https://github.com/publishing-systems/ntml/ and\n"
+              << "https://github.com/publishing-systems/ntl/ and\n"
               << "the project website http://www.publishing-systems.org.\n"
               << std::endl;
 
@@ -48,7 +48,7 @@ int main(int nArgc, char** pArgv)
     {
         std::cout << "Usage:\n"
                   << "\n"
-                  << "\tntml_to_xml_1 input-ntml-file output-xml-file\n"
+                  << "\tntl_to_xml_1 input-ntl-file output-xml-file\n"
                   << std::endl;
 
         return 1;
@@ -62,7 +62,7 @@ int main(int nArgc, char** pArgv)
 
         if (aInput.is_open() != true)
         {
-            std::cout << "ntml_to_xml_1: Couldn't open input file \"" << pArgv[1] << "\"." << std::endl;
+            std::cout << "ntl_to_xml_1: Couldn't open input file \"" << pArgv[1] << "\"." << std::endl;
             return -1;
         }
 
@@ -77,7 +77,7 @@ int main(int nArgc, char** pArgv)
 
             if (aInput.bad() == true)
             {
-                std::cout << "ntml_to_xml_1: An error occurred while reading input file \"" << pArgv[1] << "\"." << std::endl;
+                std::cout << "ntl_to_xml_1: An error occurred while reading input file \"" << pArgv[1] << "\"." << std::endl;
                 return -1;
             }
 
@@ -144,8 +144,9 @@ int main(int nArgc, char** pArgv)
                 }
                 else
                 {
-                    // TODO: hex.
-                    std::cout << "ntml_to_xml_1: Tokenizer: Unexpected character '" << cCurrent << "' in input file \"" << pArgv[1] << "\"." << std::endl;
+                    std::cout << "ntl_to_xml_1: Tokenizer: Unexpected character '" << cCurrent << "' (0x"
+                              << std::hex << std::uppercase << cCurrent << std::nouppercase << std::dec
+                              << ") in input file \"" << pArgv[1] << "\"." << std::endl;
                     return -1;
                 }
 
@@ -179,15 +180,15 @@ int main(int nArgc, char** pArgv)
 
     if (aOutput.is_open() != true)
     {
-        std::cout << "ntml_to_xml_1: Couldn't open output file \"" << pArgv[2] << "\"." << std::endl;
+        std::cout << "ntl_to_xml_1: Couldn't open output file \"" << pArgv[2] << "\"." << std::endl;
         return -1;
     }
 
-    NTMLParserXML aParser(aTokens);
+    NTLParserXML aParser(aTokens);
 
     if (aParser.Parse(aOutput) != 0)
     {
-        std::cout << "ntml_to_xml_1: An error occurred while parsing." << std::endl;
+        std::cout << "ntl_to_xml_1: An error occurred while parsing." << std::endl;
         aOutput.close();
         return -1;
     }

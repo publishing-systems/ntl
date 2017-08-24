@@ -29,9 +29,9 @@ rm -f output_fop.pdf
 rm -f output.fo
 rm -f output.html
 rm -f output.xml
-./ntml_to_xml_1 input.ntml output.xml
-fop -xml output.xml -xsl ntml_to_html_1.xsl -foout output.html
-fop -xml output.xml -xsl ntml_to_latex_1.xsl -foout output.tex
+./ntl_to_xml_1 input.ntl output.xml
+fop -xml output.xml -xsl ntl_to_html_1.xsl -foout output.html
+fop -xml output.xml -xsl ntl_to_latex_1.xsl -foout output.tex
 pdflatex -jobname output_pdflatex output.tex
-fop -xml output.xml -xsl ntml_to_fo_1.xsl -foout output.fo
+fop -xml output.xml -xsl ntl_to_fo_1.xsl -foout output.fo
 fop -c fop.xconf -fo output.fo -pdf output_fop.pdf

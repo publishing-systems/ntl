@@ -31,8 +31,9 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
   <xsl:param name="font-size">8pt</xsl:param>
   <xsl:param name="line-height">9.6pt</xsl:param>
 
-  <xsl:template match="/ntml">
+  <xsl:template match="/ntl">
     <fo:root>
+      <xsl:comment> This file was created by ntl_to_fo_1.xsl, which is free software licensed under the GNU Affero General Public License 3 or any later version (see https://github.com/publishing-systems/ntl/ and http://www.publishing-systems.org). </xsl:comment><xsl:text>&#xA;</xsl:text>
       <fo:layout-master-set>
         <fo:simple-page-master page-height="{$page-height}" page-width="{$page-width}" margin="{$outer-margin-odd-pages}" master-name="odd-page">
           <fo:region-body margin="{$inner-margin-odd-pages}"/>
@@ -68,37 +69,37 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
         <fo:flow flow-name="xsl-region-body">
           <!-- fo:block font-family="{$font-face}" font-size="{$font-size}" line-height="{$line-height}" hyphenate="true" lang="en" -->
           <fo:block font-family="{$font-face}" font-size="{$font-size}" line-height="{$line-height}">
-            <xsl:apply-templates select="/ntml/title"/>
-            <xsl:apply-templates select="/ntml/p | /ntml/list"/>
+            <xsl:apply-templates select="/ntl/title"/>
+            <xsl:apply-templates select="/ntl/p | /ntl/list"/>
           </fo:block>
         </fo:flow>
       </fo:page-sequence>
     </fo:root>
   </xsl:template>
 
-  <xsl:template match="/ntml/title[1]">
+  <xsl:template match="/ntl/title[1]">
     <fo:block font-size="{$font-size} * 1.4" line-height="{$font-size} * 1.3" font-weight="bold" text-align="center" space-after="6mm" space-after.precedence="1" keep-with-next.within-page="always">
       <xsl:value-of select="./text()"/>
     </fo:block>
   </xsl:template>
 
-  <xsl:template match="/ntml/p">
+  <xsl:template match="/ntl/p">
     <fo:block space-after="{$line-height}" text-align="justify">
       <xsl:apply-templates/>
     </fo:block>
   </xsl:template>
 
-  <xsl:template match="/ntml/p/text()">
+  <xsl:template match="/ntl/p/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntml/list">
+  <xsl:template match="/ntl/list">
     <fo:list-block>
       <xsl:apply-templates/>
     </fo:list-block>
   </xsl:template>
 
-  <xsl:template match="/ntml/list/item">
+  <xsl:template match="/ntl/list/item">
     <fo:list-item>
       <fo:list-item-label end-indent="label-end()">
         <fo:block>
@@ -113,17 +114,17 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     </fo:list-item>
   </xsl:template>
 
-  <xsl:template match="/ntml/list/item/text()">
+  <xsl:template match="/ntl/list/item/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntml/p/highlighted | /ntml/p/list/item/highlighted">
+  <xsl:template match="/ntl/p/highlighted | /ntl/p/list/item/highlighted">
     <fo:inline font-weight="bold">
       <xsl:apply-templates/>
     </fo:inline>
   </xsl:template>
 
-  <xsl:template match="/ntml/p/highlighted/text() | /ntml/p/list/item/highlighted/text()">
+  <xsl:template match="/ntl/p/highlighted/text() | /ntl/p/list/item/highlighted/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 

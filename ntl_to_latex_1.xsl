@@ -20,9 +20,9 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="text" encoding="UTF-8"/>
 
-  <xsl:template match="/ntml">
+  <xsl:template match="/ntl">
     <xsl:text>\documentclass[a4paper]{article}&#xA;</xsl:text>
-    <xsl:text>% This file was created by ntml_to_latex_1.xsl, which is free software licensed under the GNU Affero General Public License 3 or any later version (see https://github.com/publishing-systems/ntml/ and http://www.publishing-systems.org).&#xA;</xsl:text>
+    <xsl:text>% This file was created by ntl_to_latex_1.xsl, which is free software licensed under the GNU Affero General Public License 3 or any later version (see https://github.com/publishing-systems/ntl/ and http://www.publishing-systems.org).&#xA;</xsl:text>
     <xsl:text>&#xA;</xsl:text>
     <xsl:text>\usepackage[utf8]{inputenc}&#xA;</xsl:text>
     <xsl:text>&#xA;</xsl:text>
@@ -34,7 +34,7 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     <xsl:text>\end{document}&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntml/title[1]">
+  <xsl:template match="/ntl/title[1]">
     <xsl:text>\title{</xsl:text>
     <xsl:value-of select="./text()"/>
     <xsl:text>}&#xA;</xsl:text>
@@ -42,41 +42,41 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     <xsl:text>\maketitle&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntml/p">
+  <xsl:template match="/ntl/p">
     <xsl:apply-templates/>
     <xsl:text>&#xA;&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntml/p/text()">
+  <xsl:template match="/ntl/p/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntml/list">
+  <xsl:template match="/ntl/list">
     <xsl:text>\begin{itemize}&#xA;</xsl:text>
     <xsl:text>\setlength{\itemsep}{0pt}&#xA;</xsl:text>
     <xsl:apply-templates/>
     <xsl:text>\end{itemize}&#xA;&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntml/list/item">
+  <xsl:template match="/ntl/list/item">
     <xsl:text>\item </xsl:text>
     <xsl:apply-templates/>
     <xsl:text>&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntml/list/item/text()">
+  <xsl:template match="/ntl/list/item/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntml/p/highlighted |
-                       /ntml/list/item/highlighted">
+  <xsl:template match="/ntl/p/highlighted |
+                       /ntl/list/item/highlighted">
     <xsl:text>\emph{</xsl:text>
     <xsl:apply-templates/>
     <xsl:text>}</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntml/p/highlighted/text() |
-                       /ntml/list/item/highlighted/text()">
+  <xsl:template match="/ntl/p/highlighted/text() |
+                       /ntl/list/item/highlighted/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
