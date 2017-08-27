@@ -44,9 +44,11 @@ int NTLParserXML::Parse(std::ostream& aOutput)
 
     aOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     aOutput << "<!-- This file was created by ntl_to_xml_1, which is free software licensed under the GNU Affero General Public License 3 or any later version (see https://github.com/publishing-systems/ntl/ and http://www.publishing-systems.org). -->\n";
-    aOutput << "<ntl version=\"0.2\">\n";
+    aOutput << "<ntl version=\"0.1\">\n";
 
-    std::string strParagraph;
+    std::string strList;
+    std::string strTitle;
+    bool bInSection = false;
 
     while (m_aIter != m_aTokens.end())
     {
@@ -54,90 +56,129 @@ int NTLParserXML::Parse(std::ostream& aOutput)
 
         if (strToken == "#")
         {
-            if (strParagraph.empty() == false)
-            {
-                aOutput << "<p>" << strParagraph << "</p>";
-                strParagraph.clear();
-            }
+            const std::string& strInstruction = GetNextToken();
 
-            try
+            if (strInstruction == "t")
             {
-                if (ParseInstruction(aOutput) != 0)
+                if (strList.empty() == false)
+                {
+                    aOutput << "<list>" << strList << "</list>";
+                    strList.clear();
+                }
+
+                std::stringstream strNoteTitle;
+
+                if (ParseTitle(strNoteTitle) != 0)
+                {
+                    return -1;
+                }
+
+                strTitle += strNoteTitle.str();
+            }
+            else if (strInstruction == "l")
+            {
+                std::stringstream strListTitle;
+
+                if (ParseListTitle(strListTitle) != 0)
+                {
+                    return -1;
+                }
+
+                strList += strListTitle.str();
+            }
+            else if (strInstruction == "s")
+            {
+                if (strList.empty() == false)
+                {
+                    aOutput << "<list>" << strList << "</list>";
+                    strList.clear();
+                }
+
+                if (bInSection == true)
+                {
+                    aOutput << "</section>";
+                }
+
+                bInSection = true;
+                aOutput << "<section>";
+
+                if (ParseSectionTitle(aOutput) != 0)
                 {
                     return -1;
                 }
             }
-            catch (std::runtime_error ex)
+            else if (strInstruction == "b")
             {
-                std::cout << "ntl_to_xml_1: Parser: " << ex.what() << std::endl;
-                return -1;
-            }
-        }
-        else if (strToken == "::")
-        {
-            std::stringstream aHighlighted;
+                if (strList.empty() == false)
+                {
+                    aOutput << "<list>" << strList << "</list>";
+                    strList.clear();
+                }
 
-            if (ParseHighlighted(aHighlighted) != 0)
-            {
-                return -1;
-            }
-
-            strParagraph += aHighlighted.str();
-        }
-        else if (strToken.find('\n') == 0 ||
-                 strToken.find('\r') == 0)
-        {
-            if (strParagraph.empty() == false)
-            {
-                aOutput << "<p>" << strParagraph << "</p>";
-                strParagraph.clear();
+                if (ParseHorizontalLine(aOutput) != 0)
+                {
+                    return -1;
+                }
             }
             else
             {
-                // Consume/ignore.
+                if (strList.empty() == false)
+                {
+                    aOutput << "<list>" << strList << "</list>";
+                    strList.clear();
+                }
+
+                std::cout << "ntl_to_xml_1: Parser: Unknown instruction '" << strInstruction << "'." << std::endl;
+                return -1;
             }
+        }
+        else if (strToken == " ")
+        {
+            std::stringstream strListItem;
+
+            if (ParseListItem(strListItem) != 0)
+            {
+                return -1;
+            }
+
+            strList += strListItem.str();
         }
         else
         {
-            strParagraph += *m_aIter;
+            if (strList.empty() == false)
+            {
+                aOutput << "<list>" << strList << "</list>";
+                strList.clear();
+            }
+
+            if (ParseParagraph(aOutput) != 0)
+            {
+                return -1;
+            }
         }
 
         ++m_aIter;
     }
 
-    if (strParagraph.empty() == false)
+    if (strList.empty() == false)
     {
-        aOutput << "<p>" << strParagraph << "</p>";
+        aOutput << "<list>" << strList << "</list>";
+    }
+
+    if (bInSection == true)
+    {
+        aOutput << "</section>";
+    }
+
+    if (!strTitle.empty())
+    {
+        // Note title should not appear within a section, and instread of
+        // holding the entire collected data back just to output the title
+        // first, it goes to the end where the last section, if any, is closed.
+        aOutput << strTitle;
     }
 
     aOutput << "</ntl>" << std::endl;
-
-    return 0;
-}
-
-int NTLParserXML::ParseInstruction(std::ostream& aOutput)
-{
-    std::string strInstruction = GetNextToken();
-
-    if (strInstruction == "t")
-    {
-        if (ParseTitle(aOutput) != 0)
-        {
-            return -1;
-        }
-    }
-    else if (strInstruction == "b")
-    {
-        if (ParseList(aOutput) != 0)
-        {
-            return -1;
-        }
-    }
-    else
-    {
-        std::cout << "ntl_to_xml_1: Parser: Unknown instruction '" << strInstruction << "'." << std::endl;
-        return -1;
-    }
 
     return 0;
 }
@@ -166,22 +207,35 @@ int NTLParserXML::ParseTitle(std::ostream& aOutput)
     return 0;
 }
 
-int NTLParserXML::ParseList(std::ostream& aOutput)
+int NTLParserXML::ParseListTitle(std::ostream& aOutput)
 {
-    std::string strToken = GetNextToken();
-
-    if (strToken != "\n" &&
-        strToken != "\r" &&
-        strToken != "\r\n")
-    {
-        std::cout << "ntl_to_xml_1: Parser: List instruction isn't followed by a newline character." << std::endl;
-        return -1;
-    }
-
-    aOutput << "<list>";
-
     match(" ");
 
+    std::string strTitle;
+
+    while (true)
+    {
+        const std::string& strToken = GetNextToken();
+
+        if (strToken.find('\n') == 0 ||
+            strToken.find('\r') == 0)
+        {
+            break;
+        }
+
+        strTitle += strToken;
+    }
+
+    if (!strTitle.empty())
+    {
+        aOutput << "<title>" << strTitle << "</title>";
+    }
+
+    return 0;
+}
+
+int NTLParserXML::ParseListItem(std::ostream& aOutput)
+{
     std::string strItemText;
 
     while (true)
@@ -192,11 +246,21 @@ int NTLParserXML::ParseList(std::ostream& aOutput)
             strToken == "\r" ||
             strToken == "\r\n")
         {
+            if (strItemText.empty())
+            {
+                break;
+            }
+
             aOutput << "<item>" << strItemText << "</item>";
             strItemText.clear();
 
             std::list<std::string>::iterator aIterLookahead = m_aIter;
             ++aIterLookahead;
+
+            if (aIterLookahead == m_aTokens.end())
+            {
+                break;
+            }
 
             if (*aIterLookahead == " ")
             {
@@ -208,11 +272,43 @@ int NTLParserXML::ParseList(std::ostream& aOutput)
                 break;
             }
         }
+        else if (strToken.find('\n') == 0 ||
+                 strToken.find('\r') == 0)
+        {
+            // Multiple newlines.
 
-        strItemText += strToken;
+            if (strItemText.empty())
+            {
+                break;
+            }
+
+            aOutput << "<item>" << strItemText << "</item>";
+            strItemText.clear();
+
+            break;
+        }
+        else if (strToken == "::")
+        {
+            std::stringstream strHighlighted;
+
+            if (ParseHighlighted(strHighlighted) != 0)
+            {
+                return -1;
+            }
+
+            strItemText += strHighlighted.str();
+        }
+        else
+        {
+            strItemText += strToken;
+        }
     }
 
-    aOutput << "</list>";
+    if (strItemText.empty() != true)
+    {
+        aOutput << "<item>" << strItemText << "</item>";
+    }
+
     return 0;
 }
 
@@ -233,6 +329,168 @@ int NTLParserXML::ParseHighlighted(std::ostream& aOutput)
     }
 
     aOutput << "</highlighted>";
+    return 0;
+}
+
+int NTLParserXML::ParseSectionTitle(std::ostream& aOutput)
+{
+    match(" ");
+
+    std::string strTitle;
+
+    while (true)
+    {
+        const std::string& strToken = GetNextToken();
+
+        if (strToken.find('\n') == 0 ||
+            strToken.find('\r') == 0)
+        {
+            break;
+        }
+
+        strTitle += strToken;
+    }
+
+    aOutput << "<section-title>" << strTitle << "</section-title>";
+    return 0;
+}
+
+int NTLParserXML::ParseHorizontalLine(std::ostream& aOutput)
+{
+    aOutput << "<hr/>";
+
+    // Consuming/ignoring whatever follows on the line.
+
+    while (true)
+    {
+        const std::string& strToken = GetNextToken();
+
+        if (strToken.find('\n') == 0 ||
+            strToken.find('\r') == 0)
+        {
+            break;
+        }
+    }
+
+    return 0;
+}
+
+int NTLParserXML::ParseParagraph(std::ostream& aOutput)
+{
+    std::string strParagraph;
+
+    if (*m_aIter == "::")
+    {
+        std::stringstream strHighlighted;
+
+        if (ParseHighlighted(strHighlighted) != 0)
+        {
+            return -1;
+        }
+
+        strParagraph += strHighlighted.str();
+    }
+    else
+    {
+        strParagraph += *m_aIter;
+    }
+
+    while (true)
+    {
+        const std::string& strToken = GetNextToken();
+
+        if (strToken.find('\n') == 0 ||
+            strToken.find('\r') == 0)
+        {
+            std::list<std::string>::iterator aIterLookahead = m_aIter;
+            ++aIterLookahead;
+
+            if (aIterLookahead == m_aTokens.end())
+            {
+                break;
+            }
+
+            if (*aIterLookahead == "#" ||
+                *aIterLookahead == " ")
+            {
+                break;
+            }
+
+            strParagraph += " ";
+        }
+        else if (strToken.find(" ") == 0)
+        {
+            std::list<std::string>::iterator aIterLookahead = m_aIter;
+            ++aIterLookahead;
+
+            if (aIterLookahead == m_aTokens.end())
+            {
+                break;
+            }
+
+            if (*aIterLookahead == "//")
+            {
+                m_aIter = aIterLookahead;
+                aIterLookahead = m_aIter;
+                ++aIterLookahead;
+
+                if (aIterLookahead == m_aTokens.end())
+                {
+                    break;
+                }
+
+                if (aIterLookahead->find('\n') == 0 ||
+                    aIterLookahead->find('\r') == 0 ||
+                    aIterLookahead->find(' ') == 0)
+                {
+                    while (true)
+                    {
+                        const std::string& strToken = GetNextToken();
+
+                        if (strToken.find('\n') == 0 ||
+                            strToken.find('\r') == 0 ||
+                            strToken.find(' ') == 0)
+                        {
+                            // Consume/ignore trailing whitespace as "//" specificly asks
+                            // for a new paragraph, so there won't follow a list, probably
+                            // just an # instruction in case of weird input file.
+                            continue;
+                        }
+
+                        --m_aIter;
+                        break;
+                    }
+                }
+
+                break;
+            }
+            else
+            {
+                strParagraph += strToken;
+            }
+        }
+        else if (strToken == "::")
+        {
+            std::stringstream strHighlighted;
+
+            if (ParseHighlighted(strHighlighted) != 0)
+            {
+                return -1;
+            }
+
+            strParagraph += strHighlighted.str();
+        }
+        else
+        {
+            strParagraph += strToken;
+        }
+    }
+
+    if (!strParagraph.empty())
+    {
+        aOutput << "<p>" << strParagraph << "</p>";
+    }
+
     return 0;
 }
 

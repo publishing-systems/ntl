@@ -186,10 +186,18 @@ int main(int nArgc, char** pArgv)
 
     NTLParserXML aParser(aTokens);
 
-    if (aParser.Parse(aOutput) != 0)
+    try
     {
-        std::cout << "ntl_to_xml_1: An error occurred while parsing." << std::endl;
-        aOutput.close();
+        if (aParser.Parse(aOutput) != 0)
+        {
+            std::cout << "ntl_to_xml_1: An error occurred while parsing." << std::endl;
+            aOutput.close();
+            return -1;
+        }
+    }
+    catch (std::exception ex)
+    {
+        std::cout << "ntml_to_xml_1: Parser: " << ex.what() << std::endl;
         return -1;
     }
 

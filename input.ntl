@@ -1,8 +1,16 @@
 This is some general text.
-:: This is some highlighted text ::
-#t Title
+#s Section title
+::This is some highlighted text::
+#t Note/Document title anywhere you want
+ List item introduced by space as first character of the line
+ Another list item with some ::highlighted text::
+ Last item as the next line doesn't start with space
+#l Optional list title below, above or between list items
+::Highlighted text::
+#s Another section
+This is ::highlighted text again:: within some general text.
 #b
- List item
- another list item
-:: Highlighted text ::
-This is :: highlighted text again ::
+A long, long text, interrupted by newlines,
+
+
+but actually a new paragraph is started by ending the previous paragraph with // so this text here is part of the next paragraph.

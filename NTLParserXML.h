@@ -39,10 +39,13 @@ public:
     int Parse(std::ostream& aOutput);
 
 private:
-    int ParseInstruction(std::ostream& aOutput);
     int ParseTitle(std::ostream& aOutput);
-    int ParseList(std::ostream& aOutput);
+    int ParseListTitle(std::ostream& aOutput);
+    int ParseListItem(std::ostream& aOutput);
     int ParseHighlighted(std::ostream& aOutput);
+    int ParseSectionTitle(std::ostream& aOutput);
+    int ParseHorizontalLine(std::ostream& aOutput);
+    int ParseParagraph(std::ostream& aOutput);
 
 private:
     bool match(const std::string& strRequired);

@@ -21,15 +21,19 @@
 
 
 
+CFLAGS = -Wall -Werror -Wextra -pedantic
+
+
+
 build: ntl_to_xml_1
 
 
 
 ntl_to_xml_1: ntl_to_xml_1.cpp NTLParserXML.o
-	g++ ntl_to_xml_1.cpp NTLParserXML.o -o ntl_to_xml_1 -Wall -Werror
+	g++ ntl_to_xml_1.cpp NTLParserXML.o -o ntl_to_xml_1 $(CFLAGS)
 
 NTLParserXML.o: NTLParserXML.h NTLParserXML.cpp
-	g++ NTLParserXML.cpp -c -Wall -Werror
+	g++ NTLParserXML.cpp -c $(CFLAGS)
 
 clean:
 	rm -f ./ntl_to_xml_1
