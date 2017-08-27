@@ -30,7 +30,7 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     <xsl:text>&#xA;</xsl:text>
     <xsl:text>\begin{document}&#xA;</xsl:text>
     <xsl:apply-templates select="./title"/>
-    <xsl:apply-templates select="./p | ./list"/>
+    <xsl:apply-templates select="./p | ./list | ./section"/>
     <xsl:text>\end{document}&#xA;</xsl:text>
   </xsl:template>
 
@@ -42,42 +42,57 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     <xsl:text>\maketitle&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntl/p">
+  <xsl:template match="/ntl/section">
+    <xsl:text>\section{</xsl:text>
+    <xsl:value-of select="./section-title/text()"/>
+    <xsl:text>}&#xA;</xsl:text>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="/ntl/p | /ntl/section/p">
     <xsl:apply-templates/>
     <xsl:text>&#xA;&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntl/p/text()">
+  <xsl:template match="/ntl/p/text() | /ntl/section/p/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntl/list">
+  <xsl:template match="/ntl/list | /ntl/section/list">
     <xsl:text>\begin{itemize}&#xA;</xsl:text>
     <xsl:text>\setlength{\itemsep}{0pt}&#xA;</xsl:text>
     <xsl:apply-templates/>
     <xsl:text>\end{itemize}&#xA;&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntl/list/item">
+  <xsl:template match="/ntl/list/item | /ntl/section/list/item">
     <xsl:text>\item </xsl:text>
     <xsl:apply-templates/>
     <xsl:text>&#xA;</xsl:text>
   </xsl:template>
 
-  <xsl:template match="/ntl/list/item/text()">
+  <xsl:template match="/ntl/list/item/text() | /ntl/section/list/item/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
   <xsl:template match="/ntl/p/highlighted |
-                       /ntl/list/item/highlighted">
+                       /ntl/list/item/highlighted |
+                       /ntl/section/p/highlighted |
+                       /ntl/section/list/item/highlighted">
     <xsl:text>\emph{</xsl:text>
     <xsl:apply-templates/>
     <xsl:text>}</xsl:text>
   </xsl:template>
 
   <xsl:template match="/ntl/p/highlighted/text() |
-                       /ntl/list/item/highlighted/text()">
+                       /ntl/list/item/highlighted/text() |
+                       /ntl/section/p/highlighted/text() |
+                       /ntl/section/list/item/highlighted/text()">
     <xsl:value-of select="."/>
+  </xsl:template>
+
+  <xsl:template match="/ntl/hr | /ntl/section/hr">
+    <xsl:text>\noindent\rule{\textwidth}{1pt}&#xA;</xsl:text>
   </xsl:template>
 
   <xsl:template match="node()|@*|text()"/>

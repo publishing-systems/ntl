@@ -228,7 +228,7 @@ int NTLParserXML::ParseListTitle(std::ostream& aOutput)
 
     if (!strTitle.empty())
     {
-        aOutput << "<title>" << strTitle << "</title>";
+        aOutput << "<list-title>" << strTitle << "</list-title>";
     }
 
     return 0;

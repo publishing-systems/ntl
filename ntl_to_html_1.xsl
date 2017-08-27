@@ -17,7 +17,7 @@ GNU Affero General Public License 3 for more details.
 You should have received a copy of the GNU Affero General Public License 3
 along with part of this file. If not, see <http://www.gnu.org/licenses/>.
 -->
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml">
   <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes" doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
 
   <xsl:template match="/ntl">
@@ -30,47 +30,70 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
         </title>
       </head>
       <body>
-        <xsl:apply-templates/>
+        <div>
+          <h1><xsl:value-of select="./title[1]/text()"/></h1>
+          <xsl:apply-templates/>
+        </div>
       </body>
     </html>
   </xsl:template>
 
-  <xsl:template match="/ntl/p">
+  <xsl:template match="/ntl/section">
+    <div class="section">
+      <h2><xsl:value-of select="./section-title/text()"/></h2>
+      <xsl:apply-templates/>
+    </div>
+  </xsl:template>
+
+  <xsl:template match="/ntl/p | /ntl/section/p">
     <p>
       <xsl:apply-templates/>
     </p>
   </xsl:template>
 
-  <xsl:template match="/ntl/p/text()">
+  <xsl:template match="/ntl/p/text() | /ntl/section/p/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntl/list">
-    <ul>
-      <xsl:apply-templates/>
-    </ul>
+  <xsl:template match="/ntl/list | /ntl/section/list">
+    <div>
+      <xsl:if test="./list-title">
+        <span class="list-title"><xsl:value-of select="./list-title/text()"/><xsl:text>:</xsl:text></span>
+      </xsl:if>
+      <ul>
+        <xsl:apply-templates/>
+      </ul>
+    </div>
   </xsl:template>
 
-  <xsl:template match="/ntl/list/item">
+  <xsl:template match="/ntl/list/item | /ntl/section/list/item">
     <li>
       <xsl:apply-templates/>
     </li>
   </xsl:template>
 
-  <xsl:template match="/ntl/list/item/text()">
+  <xsl:template match="/ntl/list/item/text() | /ntl/section/list/item/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
   <xsl:template match="/ntl/p/highlighted |
-                       /ntl/list/item/highlighted">
+                       /ntl/list/item/highlighted |
+                       /ntl/section/p/highlighted |
+                       /ntl/section/list/item/highlighted">
     <i>
       <xsl:apply-templates/>
     </i>
   </xsl:template>
 
   <xsl:template match="/ntl/p/highlighted/text() |
-                       /ntl/list/item/highlighted/text()">
+                       /ntl/list/item/highlighted/text() |
+                       /ntl/section/p/highlighted/text() |
+                       /ntl/section/list/item/highlighted/text()">
     <xsl:value-of select="."/>
+  </xsl:template>
+
+  <xsl:template match="/ntl/hr | ntl/section/hr">
+    <hr/>
   </xsl:template>
 
   <xsl:template match="node()|@*|text()"/>

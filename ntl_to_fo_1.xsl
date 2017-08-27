@@ -70,7 +70,7 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
           <!-- fo:block font-family="{$font-face}" font-size="{$font-size}" line-height="{$line-height}" hyphenate="true" lang="en" -->
           <fo:block font-family="{$font-face}" font-size="{$font-size}" line-height="{$line-height}">
             <xsl:apply-templates select="/ntl/title"/>
-            <xsl:apply-templates select="/ntl/p | /ntl/list"/>
+            <xsl:apply-templates select="/ntl/p | /ntl/list | /ntl/section"/>
           </fo:block>
         </fo:flow>
       </fo:page-sequence>
@@ -83,23 +83,33 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     </fo:block>
   </xsl:template>
 
-  <xsl:template match="/ntl/p">
+  <xsl:template match="/ntl/section">
+    <fo:block font-size="{$font-size} * 1.2" line-height="{$font-size} * 1.1" font-weight="bold" space-after="6mm" space-after.precedence="1" keep-with-next.within-page="always">
+      <xsl:number count="/ntl/section"/><xsl:text>. </xsl:text><xsl:value-of select="./section-title//text()"/>
+    </fo:block>
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="/ntl/p | /ntl/section/p">
     <fo:block space-after="{$line-height}" text-align="justify">
       <xsl:apply-templates/>
     </fo:block>
   </xsl:template>
 
-  <xsl:template match="/ntl/p/text()">
+  <xsl:template match="/ntl/p/text() | /ntl/section/p/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntl/list">
+  <xsl:template match="/ntl/list | /ntl/section/list">
+    <xsl:if test="./list-title">
+      <xsl:value-of select="./list-title/text()"/><xsl:text>:</xsl:text>
+    </xsl:if>
     <fo:list-block>
       <xsl:apply-templates/>
     </fo:list-block>
   </xsl:template>
 
-  <xsl:template match="/ntl/list/item">
+  <xsl:template match="/ntl/list/item | /ntl/section/list/item">
     <fo:list-item>
       <fo:list-item-label end-indent="label-end()">
         <fo:block>
@@ -114,18 +124,28 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
     </fo:list-item>
   </xsl:template>
 
-  <xsl:template match="/ntl/list/item/text()">
+  <xsl:template match="/ntl/list/item/text() | /ntl/section/list/item/text()">
     <xsl:value-of select="."/>
   </xsl:template>
 
-  <xsl:template match="/ntl/p/highlighted | /ntl/p/list/item/highlighted">
+  <xsl:template match="/ntl/p/highlighted |
+                       /ntl/list/item/highlighted |
+                       /ntl/section/p/highlighted |
+                       /ntl/section/list/item/highlighted">
     <fo:inline font-weight="bold">
       <xsl:apply-templates/>
     </fo:inline>
   </xsl:template>
 
-  <xsl:template match="/ntl/p/highlighted/text() | /ntl/p/list/item/highlighted/text()">
+  <xsl:template match="/ntl/p/highlighted/text() |
+                       /ntl/list/item/highlighted/text() |
+                       /ntl/section/p/highlighted/text() |
+                       /ntl/section/list/item/highlighted/text()">
     <xsl:value-of select="."/>
+  </xsl:template>
+
+  <xsl:template match="/ntl/hr | ntl/section/hr">
+    <fo:leader leader-pattern="rule" leader-length="100%" rule-style="solid" rule-thickness="1pt"/>
   </xsl:template>
 
   <xsl:template match="node()|@*|text()"/>
