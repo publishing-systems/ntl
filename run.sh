@@ -20,9 +20,9 @@
 # xml_xslt_transformator_1 of the digital_publishing_workflow_tools package or
 # xmlstarlet.
 
-rm -f output_pdflatex.pdf
-rm -f output_pdflatex.aux
-rm -f output_pdflatex.log
+rm -f output_latex.pdf
+rm -f output_latex.aux
+rm -f output_latex.log
 rm -f texput.log
 rm -f output.tex
 rm -f output_fop.pdf
@@ -32,6 +32,6 @@ rm -f output.xml
 ./ntl_to_xml_1 input.ntl output.xml
 fop -xml output.xml -xsl ntl_to_html_1.xsl -foout output.html
 fop -xml output.xml -xsl ntl_to_latex_1.xsl -foout output.tex
-pdflatex -jobname output_pdflatex output.tex
+pdflatex -jobname output_latex output.tex
 fop -xml output.xml -xsl ntl_to_fo_1.xsl -foout output.fo
 fop -c fop.xconf -fo output.fo -pdf output_fop.pdf

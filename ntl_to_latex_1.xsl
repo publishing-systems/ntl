@@ -59,6 +59,10 @@ along with part of this file. If not, see <http://www.gnu.org/licenses/>.
   </xsl:template>
 
   <xsl:template match="/ntl/list | /ntl/section/list">
+    <xsl:if test="./list-title">
+      <xsl:text>&#xA;</xsl:text>
+      <xsl:value-of select="./list-title/text()"/><xsl:text>:</xsl:text>
+    </xsl:if>
     <xsl:text>\begin{itemize}&#xA;</xsl:text>
     <xsl:text>\setlength{\itemsep}{0pt}&#xA;</xsl:text>
     <xsl:apply-templates/>
